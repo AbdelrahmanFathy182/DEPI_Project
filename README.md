@@ -1,10 +1,13 @@
-Build a dashboard for controlling loT-enabled
-smart home devices, with user-friendly
-interfaces and real-time updates.
+# Smart Home Control Dashboard
 
-CAI2_SWD5_S7
-Team 5
+Build a dashboard for controlling IoT-enabled smart home devices, with user-friendly interfaces and real-time updates.
 
-Abdelrahman Fathy Mohammad
-Youssef Yasser Abdelkader
-Maryam Yasser Mohammed 
+## Project Details
+- **Project Code:** CAI2_SWD5_S7  
+- **Team:** Team 5  
+
+## Team Members
+- Abdelrahman Fathy Mohammad  
+- Youssef Yasser Abdelkader  
+- Jana Aly Eldin Elsayed Abd Elfattah  
+- Maryam Yasser Mohamed
