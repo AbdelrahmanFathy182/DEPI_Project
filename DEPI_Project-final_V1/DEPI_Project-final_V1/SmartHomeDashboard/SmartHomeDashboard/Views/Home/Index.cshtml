@@ -1,0 +1,161 @@
+﻿@using System.Linq
+@model IEnumerable<SmartHomeDashboard.Models.Device>
+<div class="main-content">
+    <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0">Home Page</h2>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary rounded-circle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                        <a class="dropdown-item" asp-controller="Account" asp-action="Index"><i class="bi bi-person me-2"></i>Profile</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Login">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+    <!-- Main Content Area -->
+    <div class="container-fluid py-4">
+        <div class="welcome-section mb-4">
+            <h2 class="h3">Welcome Home</h2>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card weather-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="h5 mb-0">Weather</h3>
+                            <small class="text-light-emphasis" id="weather-updated">Loading...</small>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-sun fs-1 me-3" id="weather-icon"></i>
+                            <div class="display-4" id="weather-temp">--°C</div>
+                        </div>
+                        <div class="mb-3" id="weather-location">--</div>
+                        <div class="mb-3" id="weather-condition">--</div>
+                        <div class="d-flex justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-droplet me-2"></i>
+                                <span id="weather-humidity">Humidity: --%</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-wind me-2"></i>
+                                <span id="weather-wind">Wind: -- km/h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            @* <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Energy Usage</h3>
+                        <div class="text-center">
+                            <div class="display-4">2.4 kW</div>
+                            <div class="text-muted">Current Usage</div>
+                        </div>
+                    </div>
+                </div>
+            </div> *@
+        </div>
+
+        <h3 class="h4 mb-4">Favourite Devices</h3>
+
+        <div class="row g-4">
+            @foreach (var device in Model.Where(d => d.Favourite))
+            {
+                var icon = device.deviceType switch
+                {
+                    DeviceType.Fan => "bi-wind",
+                    DeviceType.Light => "bi-lightbulb",
+                    DeviceType.Thermostat => "bi-thermometer-half",
+                    _ => "bi-question"
+                };
+                <div class="col-md-6 col-lg-4">
+                    <div class="card device-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h3 class="h5 mb-0">@device.Name</h3>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="status-badge @(device.IsActive ? "status-badge-on" : "status-badge-off")">
+                                        @(device.IsActive ? "ON" : "OFF")
+                                    </span>
+                                    <span class="favorite-badge ms-2">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <i class="bi @icon fs-1"></i>
+                            </div>
+                            <div class="temperature-controls">
+                                <div class="temperature-value">@device.Value</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+            
+        </div>
+    </div>
+
+</div>
+<script>
+    const WEATHER_API_KEY = 'N6G8UA39L9RE62UPWLQ6Z6NYU';
+    const DEFAULT_CITY = 'Cairo,Egypt';
+    const API_URL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${DEFAULT_CITY}?unitGroup=metric&key=${WEATHER_API_KEY}&contentType=json`;
+
+    async function updateWeather() {
+        try {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+            const current = data.currentConditions;
+
+            document.getElementById('weather-temp').textContent = `${current.temp}°C`;
+            document.getElementById('weather-location').textContent = DEFAULT_CITY;
+            document.getElementById('weather-condition').textContent = current.conditions;
+            document.getElementById('weather-humidity').textContent = `Humidity: ${current.humidity}%`;
+            document.getElementById('weather-wind').textContent = `Wind: ${current.windspeed} km/h`;
+            document.getElementById('weather-updated').textContent = `Updated just now`;
+
+            // Set icon based on conditions (simple example)
+            const iconMap = {
+                'Clear': 'bi-sun',
+                'Partly Cloudy': 'bi-cloud-sun',
+                'Cloudy': 'bi-cloud',
+                'Rain': 'bi-cloud-rain',
+                'Snow': 'bi-snow',
+                'Fog': 'bi-cloud-fog2'
+            };
+            const condition = current.conditions || 'Clear';
+            const iconClass = iconMap[condition] || 'bi-cloud';
+            const iconElement = document.getElementById('weather-icon');
+            iconElement.className = `bi ${iconClass} fs-1 me-3`;
+        } catch (error) {
+            console.error('Weather update failed:', error);
+            document.getElementById('weather-updated').textContent = 'Failed to load';
+        }
+    }
+
+    // Call the function on load
+    updateWeather();
+    setInterval(updateWeather, 1 * 60 * 1000);
+</script>
